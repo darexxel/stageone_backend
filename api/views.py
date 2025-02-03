@@ -21,27 +21,34 @@ def classify_number(request):
             }, status=400)
 
         number = int(request.GET.get('number', ''))
+        abs_number = abs(number)  # Use absolute value for calculations
 
         # Keep properties array compact
         properties = []
-        if is_armstrong(number):
+        if is_armstrong(abs_number):  # Check armstrong using absolute value
             properties.append("armstrong")
-        properties.append("odd" if number % 2 else "even")
+        properties.append("odd" if abs_number % 2 else "even")
 
         # Ensure exact fun fact format for Armstrong numbers
-        if is_armstrong(number):
-            fun_fact = f"{number} is an Armstrong number because {' + '.join([f'{d}^3' for d in str(number)])} = {number}"
+        if is_armstrong(abs_number):
+            fun_fact = f"{number} is an Armstrong number because {' + '.join([f'{d}^3' for d in str(abs_number)])} = {abs_number}"
         else:
-            response = requests.get(f'http://numbersapi.com/{number}/math')
-            fun_fact = response.text if response.status_code == 200 else f"{number} is an interesting number"
+            try:
+                response = requests.get(f'http://numbersapi.com/{number}/math')
+                fun_fact = response.text if response.status_code == 200 else f"{number} is an unremarkable number"
+            except:
+                fun_fact = f"{number} is an unremarkable number"
 
-        # Return exact JSON structure
+        digit_sum = get_digit_sum(abs_number)
+        if number < 0:
+            digit_sum = -digit_sum  # Make digit sum negative for negative numbers
+
         return Response({
             "number": number,
-            "is_prime": is_prime(number),
-            "is_perfect": is_perfect(number),
+            "is_prime": False if number < 0 else is_prime(abs_number),  # Negative numbers can't be prime
+            "is_perfect": False if number < 0 else is_perfect(abs_number),  # Negative numbers can't be perfect
             "properties": properties,
-            "digit_sum": get_digit_sum(number),
+            "digit_sum": digit_sum,
             "fun_fact": fun_fact
         })
     except ValueError:

@@ -14,4 +14,5 @@ def is_perfect(n):
     return sum(i for i in range(1, n) if n % i == 0) == n
 
 def get_digit_sum(n):
-    return sum(int(d) for d in str(n))
+    sign = -1 if n < 0 else 1
+    return sign * sum(int(d) for d in str(abs(n)))
