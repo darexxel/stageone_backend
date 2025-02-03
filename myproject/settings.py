@@ -138,5 +138,4 @@ REST_FRAMEWORK = {
     )
 }
 
-APPEND_SLASH = False
 
