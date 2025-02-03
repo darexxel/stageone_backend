@@ -14,6 +14,13 @@ def root_view(request):
 @api_view(['GET'])
 def classify_number(request):
     try:
+        # Check for missing parameter
+        if 'number' not in request.GET:
+            return Response({
+                "number": "",
+                "error": True
+            }, status=400)
+
         number = int(request.GET.get('number', ''))
 
         # Properties in exact order
@@ -22,7 +29,6 @@ def classify_number(request):
             properties.append("armstrong")
         properties.append("odd" if number % 2 else "even")
 
-        # Custom fun fact for Armstrong numbers
         if is_armstrong(number):
             fun_fact = f"{number} is an Armstrong number because {' + '.join([f'{d}^3' for d in str(number)])} = {number}"
         else:
