@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api.views import classify_number
+from api.views import classify_number, root_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', classify_number, name='classify_number'),  # Add root path
+    path('', root_view, name='root'),  # Root path for API documentation
     path('api/classify-number/', classify_number, name='classify_number')
 ]
