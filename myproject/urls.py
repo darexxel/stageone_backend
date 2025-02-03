@@ -21,5 +21,5 @@ from api.views import classify_number, root_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', root_view, name='root'),
-    path('api/classify-number', classify_number, name='classify_number')  # Removed trailing slash
+    path('api/classify-number/', classify_number, name='classify_number')  # Added trailing slash
 ]
