@@ -20,6 +20,6 @@ from api.views import classify_number, root_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', root_view, name='root'),  # Root path for API documentation
+    path('', root_view, name='root'),
     path('api/classify-number/', classify_number, name='classify_number')
 ]

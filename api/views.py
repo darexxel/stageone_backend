@@ -1,8 +1,15 @@
 import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
 from .utils import is_armstrong, is_prime, is_perfect, get_digit_sum
+
+@api_view(['GET'])
+def root_view(request):
+    return Response({
+        "message": "Number Classification API",
+        "example": "/api/classify-number?number=371",
+        "documentation": "https://github.com/darexxel/stageone_backend"
+    })
 
 @api_view(['GET'])
 def classify_number(request):
