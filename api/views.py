@@ -24,7 +24,7 @@ def classify_number(request):
 
         # Custom fun fact for Armstrong numbers
         if is_armstrong(number):
-            fun_fact = f"{number} is an Armstrong number because {'+'.join([f'{d}^3' for d in str(number)])} = {number}"
+            fun_fact = f"{number} is an Armstrong number because {' + '.join([f'{d}^3' for d in str(number)])} = {number}"
         else:
             response = requests.get(f'http://numbersapi.com/{number}/math')
             fun_fact = response.text if response.status_code == 200 else f"{number} is an interesting number"
