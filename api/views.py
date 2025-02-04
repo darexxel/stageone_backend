@@ -1,58 +1,60 @@
+# views.py
+
 import requests
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .utils import is_armstrong, is_prime, is_perfect, get_digit_sum
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from .utils import is_prime, is_perfect, is_armstrong, digit_sum
 
-@api_view(['GET'])
-def root_view(request):
-    return Response({
-        "message": "Number Classification API",
-        "example": "/api/classify-number?number=371",
-        "documentation": "https://github.com/darexxel/stageone_backend"
-    })
-
-@api_view(['GET'])
+@require_GET
 def classify_number(request):
+    # Get the 'number' query parameter.
+    number_param = request.GET.get('number')
     try:
-        if 'number' not in request.GET:
-            return Response({
-                "number": "alphabet",
-                "error": True
-            }, status=400)
-
-        number = int(request.GET.get('number', ''))
-        abs_number = abs(number)  # Use absolute value for calculations
-
-        # Keep properties array compact
-        properties = []
-        if is_armstrong(abs_number):  # Check armstrong using absolute value
-            properties.append("armstrong")
-        properties.append("odd" if abs_number % 2 else "even")
-
-        # Ensure exact fun fact format for Armstrong numbers
-        if is_armstrong(abs_number):
-            fun_fact = f"{number} is an Armstrong number because {' + '.join([f'{d}^3' for d in str(abs_number)])} = {abs_number}"
-        else:
-            try:
-                response = requests.get(f'http://numbersapi.com/{number}/math')
-                fun_fact = response.text if response.status_code == 200 else f"{number} is an unremarkable number"
-            except:
-                fun_fact = f"{number} is an unremarkable number"
-
-        digit_sum = get_digit_sum(abs_number)
-        if number < 0:
-            digit_sum = -digit_sum  # Make digit sum negative for negative numbers
-
-        return Response({
-            "number": number,
-            "is_prime": False if number < 0 else is_prime(abs_number),  # Negative numbers can't be prime
-            "is_perfect": False if number < 0 else is_perfect(abs_number),  # Negative numbers can't be perfect
-            "properties": properties,
-            "digit_sum": digit_sum,
-            "fun_fact": fun_fact
-        })
-    except ValueError:
-        return Response({
-            "number": "alphabet",
+        number = int(number_param)
+    except (ValueError, TypeError):
+        # If conversion fails, return a 400 Bad Request with error info.
+        response_data = {
+            "number": number_param,
             "error": True
-        }, status=400)
+        }
+        return JsonResponse(response_data, status=400)
+    
+    # Determine mathematical properties.
+    prime_flag = is_prime(number)
+    perfect_flag = is_perfect(number)
+    armstrong_flag = is_armstrong(number)
+    
+    # Determine the properties field based on the requirements:
+    # If the number is an Armstrong number, include "armstrong" and then "odd" or "even" based on its parity.
+    # Otherwise, include only the parity.
+    if armstrong_flag:
+        properties = ["armstrong", "odd" if number % 2 != 0 else "even"]
+    else:
+        properties = ["odd" if number % 2 != 0 else "even"]
+    
+    # Compute digit sum.
+    ds = digit_sum(number)
+    
+    # Get a fun fact using the Numbers API (math type).
+    try:
+        api_url = f"http://numbersapi.com/{number}/math"
+        fun_fact_response = requests.get(api_url, timeout=2)
+        # Use the returned text if the API call was successful.
+        fun_fact = fun_fact_response.text if fun_fact_response.status_code == 200 else ""
+    except Exception:
+        fun_fact = ""
+    
+    # Build the response data.
+    response_data = {
+        "number": number,
+        "is_prime": prime_flag,
+        "is_perfect": perfect_flag,
+        "properties": properties,
+        "digit_sum": ds,
+        "fun_fact": fun_fact
+    }
+    
+    # Create the JsonResponse and add CORS header.
+    response = JsonResponse(response_data)
+    response["Access-Control-Allow-Origin"] = "*"
+    return response

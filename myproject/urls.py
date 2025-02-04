@@ -14,12 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# myproject/urls.py
+
 from django.contrib import admin
-from django.urls import path
-from api.views import classify_number, root_view
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', root_view, name='root'),
-    path('api/classify-number/', classify_number, name='classify_number')  # Added trailing slash
+    # This line includes the API endpoints from the api app.
+    # With the following configuration, a GET request to /api/classify-number?number=... will be routed to your view.
+    path('api/', include('api.urls')),
 ]
